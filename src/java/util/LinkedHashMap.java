@@ -189,6 +189,7 @@ public class LinkedHashMap<K,V>
     /**
      * HashMap.Node subclass for normal LinkedHashMap entries.
      */
+    // 位于LinkedHashMap中
     static class Entry<K,V> extends HashMap.Node<K,V> {
         Entry<K,V> before, after;
         Entry(int hash, K key, V value, Node<K,V> next) {
@@ -200,11 +201,13 @@ public class LinkedHashMap<K,V>
 
     /**
      * The head (eldest) of the doubly linked list.
+     * 双向链表头节点，旧数据存在头节点。
      */
     transient LinkedHashMap.Entry<K,V> head;
 
     /**
      * The tail (youngest) of the doubly linked list.
+     * 双向链表尾节点，新数据存在尾节点。
      */
     transient LinkedHashMap.Entry<K,V> tail;
 
@@ -213,6 +216,7 @@ public class LinkedHashMap<K,V>
      * for access-order, <tt>false</tt> for insertion-order.
      *
      * @serial
+     * 是否按访问顺序排序，如果为false则按插入顺序存储元素，如果是true则按访问顺序存储元素。
      */
     final boolean accessOrder;
 
@@ -220,12 +224,18 @@ public class LinkedHashMap<K,V>
 
     // link at the end of list
     private void linkNodeLast(LinkedHashMap.Entry<K,V> p) {
+        //首先获取当前链表的最后一个元素
         LinkedHashMap.Entry<K,V> last = tail;
+        //当前插入的元素定义为最后一个元素
         tail = p;
         if (last == null)
+            //如果之前的最后元素是null，说明之前的链表就是空的，所以当前的元素是一个元素。
             head = p;
         else {
+            //如果之前的链表不是null
+            //put前的最后一个元素设置为当前put元素的前一个。
             p.before = last;
+            //当前put元素设置为put前最后一个元素的下一个
             last.after = p;
         }
     }
@@ -280,49 +290,69 @@ public class LinkedHashMap<K,V>
         return t;
     }
 
+    //在移除元素后修改双向链表
     void afterNodeRemoval(Node<K,V> e) { // unlink
         LinkedHashMap.Entry<K,V> p =
             (LinkedHashMap.Entry<K,V>)e, b = p.before, a = p.after;
+        //首先删除元素的前后节点引用置空
         p.before = p.after = null;
         if (b == null)
+            //如果当前元素的前节点是null，则证明当前元素原来是头节点。
+            //因此删除当前元素后，当前元素的后节点就变成了头节点。
             head = a;
         else
+            //如果前节点不为null，则前节点的after引用后节点。
             b.after = a;
         if (a == null)
+            //如果当前元素的后节点为null，则说明当前元素为尾节点，删除当前元素后，尾节点变成当前元素的前节点。
             tail = b;
         else
+            //尾节点不为null，尾节点的前节点引用删除元素的前节点。
             a.before = b;
     }
 
+    //这个方法是在HashMap的代码里调用的，在put方法中调用的时候参数evict传的是true evict，驱逐的意思。
     void afterNodeInsertion(boolean evict) { // possibly remove eldest
         LinkedHashMap.Entry<K,V> first;
+        //evict是true，(first = head)=true,而removeEldestEntry()方法默认返回的是false，因此if内的逻辑默认是不执行的。
         if (evict && (first = head) != null && removeEldestEntry(first)) {
             K key = first.key;
+            //移除链表头部的元素
             removeNode(hash(key), key, null, false, true);
         }
     }
 
+    //在节点访问之后被调用，主要在put()已经存在的元素或get()时被调用，如果accessOrder为true，调用这个方法把访问到的节点移动到双向链表的末尾。
     void afterNodeAccess(Node<K,V> e) { // move node to last
         LinkedHashMap.Entry<K,V> last;
+        //accessOrder 是LinkedHashMap实例化的时候的入参，需手动传true该方法的逻辑才会启用。
         if (accessOrder && (last = tail) != e) {
             LinkedHashMap.Entry<K,V> p =
                 (LinkedHashMap.Entry<K,V>)e, b = p.before, a = p.after;
+            //p为当前尾节点，因此p.after = null;
             p.after = null;
+            //p.before==null，说明p以前是头节点，但是现在需要把p放在尾节点，则以前p.after就变成了头节点。
             if (b == null)
                 head = a;
             else
+                //原来的顺序是b <-> p <-> a...现在p需要移动到尾部，则就变成了b <-> a...... <->p
                 b.after = a;
             if (a != null)
+                //原来a.before是p，现在p移动走了，那p.before就变成了a.before
                 a.before = b;
             else
+                //如果之前p就是尾节点，则将last引用p.before
                 last = b;
             if (last == null)
+                //如果原来尾节点是空，则说明当前链表只有一个节点，因此head引用p
                 head = p;
             else {
+                //之前尾节点不为空，因为p移动到了最后，因此p.before引用原尾节点，原尾节点.after引用p
                 p.before = last;
                 last.after = p;
             }
             tail = p;
+            //计数器自增1
             ++modCount;
         }
     }
@@ -412,6 +442,7 @@ public class LinkedHashMap<K,V>
      *         specified value
      */
     public boolean containsValue(Object value) {
+        //循环查找所有键值对的中和value重复的数据
         for (LinkedHashMap.Entry<K,V> e = head; e != null; e = e.after) {
             V v = e.value;
             if (v == value || (value != null && value.equals(v)))
@@ -437,9 +468,11 @@ public class LinkedHashMap<K,V>
      */
     public V get(Object key) {
         Node<K,V> e;
+        //getNode()调用是HashMap.getNode()
         if ((e = getNode(hash(key), key)) == null)
             return null;
         if (accessOrder)
+            //将当前元素移动到尾节点
             afterNodeAccess(e);
         return e.value;
     }
@@ -505,6 +538,7 @@ public class LinkedHashMap<K,V>
      * @return   <tt>true</tt> if the eldest entry should be removed
      *           from the map; <tt>false</tt> if it should be retained.
      */
+    // 默认removeEldestEntry()方法返回false，也就是不删除元素。
     protected boolean removeEldestEntry(Map.Entry<K,V> eldest) {
         return false;
     }

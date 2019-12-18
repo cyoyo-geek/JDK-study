@@ -275,6 +275,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      * Basic hash bin node, used for most entries.  (See below for
      * TreeNode subclass, and in LinkedHashMap for its Entry subclass.)
      */
+    // 位于HashMap中
     static class Node<K,V> implements Map.Entry<K,V> {
         final int hash;
         final K key;
@@ -627,6 +628,8 @@ public class HashMap<K,V> extends AbstractMap<K,V>
         if ((tab = table) == null || (n = tab.length) == 0)
             n = (tab = resize()).length;
         if ((p = tab[i = (n - 1) & hash]) == null)
+            //调用了newNode()方法，这里用到了一个面向对象里多态的特性，而LinkedHashMap重写了newNode()方法
+            //如果是LindedHashMap对象调用，触发的是LinkedHashMap重写的newNode()
             tab[i] = newNode(hash, key, value, null);
         else {
             Node<K,V> e; K k;
@@ -649,10 +652,13 @@ public class HashMap<K,V> extends AbstractMap<K,V>
                     p = e;
                 }
             }
+            //有重复的key，则用待插入值进行覆盖，返回旧值。
             if (e != null) { // existing mapping for key
                 V oldValue = e.value;
                 if (!onlyIfAbsent || oldValue == null)
                     e.value = value;
+                //HashMap中该方法没做任何操作，LinkedHashMap进行了重写实现，并调用。
+                //该方法主要将当前节点移动到双向链表尾部
                 afterNodeAccess(e);
                 return oldValue;
             }
@@ -660,6 +666,9 @@ public class HashMap<K,V> extends AbstractMap<K,V>
         ++modCount;
         if (++size > threshold)
             resize();
+        //每次put新元素都会调用（如果是更新已有元素则不调用，因为没有新增元素，不会导致size+1）
+        //但是HashMap中该方法没做任何操作, LinkedHashMap进行了重写实现.
+        //主要用于移除最早的元素
         afterNodeInsertion(evict);
         return null;
     }
@@ -809,6 +818,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      * @param movable if false do not move other nodes while removing
      * @return the node, or null if none
      */
+    //HashMap中的removeNode方法，主要用于删除某一个元素
     final Node<K,V> removeNode(int hash, Object key, Object value,
                                boolean matchValue, boolean movable) {
         Node<K,V>[] tab; Node<K,V> p; int n, index;
