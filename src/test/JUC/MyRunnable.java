@@ -1,4 +1,4 @@
-package JUC;
+package test.JUC;
 
 public class MyRunnable implements Runnable {
     private String name;

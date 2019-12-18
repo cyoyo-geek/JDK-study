@@ -1,4 +1,4 @@
-package JUC;
+package test.JUC;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;

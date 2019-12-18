@@ -1,4 +1,4 @@
-package OutOfMemory;
+package test.OutOfMemory;
 
 import java.util.HashMap;
 import java.util.Map;
