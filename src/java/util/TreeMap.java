@@ -107,7 +107,15 @@ import java.util.function.Consumer;
  * @see Collection
  * @since 1.2
  */
-
+//SortedMap规定了元素可以按key的大小来遍历，它定义了一些返回部分map的方法。
+/**
+ * TreeMap只使用到了红黑树，所以它的时间复杂度为O(log n)，我们再来回顾一下红黑树的特性。
+ * （1）每个节点或者是黑色，或者是红色。
+ * （2）根节点是黑色。
+ * （3）每个叶子节点（NIL）是黑色。（注意：这里叶子节点，是指为空(NIL或NULL)的叶子节点！）
+ * （4）如果一个节点是红色的，则它的子节点必须是黑色的。
+ * （5）从一个节点到该节点的子孙节点的所有路径上包含相同数目的黑节点。
+ */
 public class TreeMap<K,V>
     extends AbstractMap<K,V>
     implements NavigableMap<K,V>, Cloneable, java.io.Serializable
@@ -115,20 +123,24 @@ public class TreeMap<K,V>
     /**
      * The comparator used to maintain order in this tree map, or
      * null if it uses the natural ordering of its keys.
-     *
+     * 比较器，如果没传则key要实现Comparable接口
+     * 按key的大小排序有两种方式，一种是key实现Comparable接口，一种方式通过构造方法传入比较器。
      * @serial
      */
     private final Comparator<? super K> comparator;
 
+    //根节点 TreeMap没有桶的概念，所有的元素都存储在一颗树中。
     private transient Entry<K,V> root;
 
     /**
      * The number of entries in the tree
+     * 元素个数
      */
     private transient int size = 0;
 
     /**
      * The number of structural modifications to the tree.
+     * 修改次数
      */
     private transient int modCount = 0;
 
@@ -144,6 +156,7 @@ public class TreeMap<K,V>
      * {@code put(Object key, Object value)} call will throw a
      * {@code ClassCastException}.
      */
+    //默认构造方法，key必须实现Comparable接口
     public TreeMap() {
         comparator = null;
     }
@@ -162,6 +175,7 @@ public class TreeMap<K,V>
      *        If {@code null}, the {@linkplain Comparable natural
      *        ordering} of the keys will be used.
      */
+    //使用传入的comparator比较两个key的大小
     public TreeMap(Comparator<? super K> comparator) {
         this.comparator = comparator;
     }
@@ -180,6 +194,7 @@ public class TreeMap<K,V>
      *         or are not mutually comparable
      * @throws NullPointerException if the specified map is null
      */
+    //key必须实现Comparable接口，把传入map中的所有元素保存到新的TreeMap中
     public TreeMap(Map<? extends K, ? extends V> m) {
         comparator = null;
         putAll(m);
@@ -194,6 +209,7 @@ public class TreeMap<K,V>
      *         and whose comparator is to be used to sort this map
      * @throws NullPointerException if the specified map is null
      */
+    //使用传入map的比较器，并把传入map中的所有元素保存到新的TreeMap中
     public TreeMap(SortedMap<K, ? extends V> m) {
         comparator = m.comparator();
         try {
@@ -275,7 +291,9 @@ public class TreeMap<K,V>
      *         does not permit null keys
      */
     public V get(Object key) {
+        // 根据key查找元素
         Entry<K,V> p = getEntry(key);
+        // 找到了返回value值，没找到返回null
         return (p==null ? null : p.value);
     }
 
@@ -341,20 +359,27 @@ public class TreeMap<K,V>
      */
     final Entry<K,V> getEntry(Object key) {
         // Offload comparator-based version for sake of performance
+        // 如果comparator不为空，使用comparator的版本获取元素
         if (comparator != null)
             return getEntryUsingComparator(key);
+        // 如果key为空返回空指针异常
         if (key == null)
             throw new NullPointerException();
+        // 将key强转为Comparable
         @SuppressWarnings("unchecked")
             Comparable<? super K> k = (Comparable<? super K>) key;
+        // 从根元素开始遍历
         Entry<K,V> p = root;
         while (p != null) {
             int cmp = k.compareTo(p.key);
             if (cmp < 0)
+                // 如果小于0从左子树查找
                 p = p.left;
             else if (cmp > 0)
+                // 如果大于0从右子树查找
                 p = p.right;
             else
+                // 如果相等说明找到了直接返回
                 return p;
         }
         return null;
@@ -371,17 +396,22 @@ public class TreeMap<K,V>
             K k = (K) key;
         Comparator<? super K> cpr = comparator;
         if (cpr != null) {
+            // 从根元素开始遍历
             Entry<K,V> p = root;
             while (p != null) {
                 int cmp = cpr.compare(k, p.key);
                 if (cmp < 0)
+                    // 如果小于0从左子树查找
                     p = p.left;
                 else if (cmp > 0)
+                    // 如果大于0从右子树查找
                     p = p.right;
                 else
+                    // 如果相等说明找到了直接返回
                     return p;
             }
         }
+        // 没找到返回null
         return null;
     }
 
@@ -2049,7 +2079,7 @@ public class TreeMap<K,V>
      * Node in the Tree.  Doubles as a means to pass key-value pairs back to
      * user (see Map.Entry).
      */
-
+    //存储节点，典型的红黑树结构。
     static final class Entry<K,V> implements Map.Entry<K,V> {
         K key;
         V value;
@@ -2218,37 +2248,65 @@ public class TreeMap<K,V>
     }
 
     /** From CLR */
+    /**
+     * 以p为支点进行左旋
+     * 假设p为图中的x
+     */
     private void rotateLeft(Entry<K,V> p) {
         if (p != null) {
+            // p的右节点，即y
             Entry<K,V> r = p.right;
+            // （1）将 y的左节点 设为 x的右节点
             p.right = r.left;
+            // （2）将 x 设为 y的左节点的父节点（如果y的左节点存在的话）
             if (r.left != null)
                 r.left.parent = p;
+            // （3）将 x的父节点 设为 y的父节点
             r.parent = p.parent;
+            // （4）...
             if (p.parent == null)
+                // 如果 x的父节点 为空，则将y设置为根节点
                 root = r;
             else if (p.parent.left == p)
+                // 如果x是它父节点的左节点，则将y设置为x父节点的左节点
                 p.parent.left = r;
             else
+                // 如果x是它父节点的右节点，则将y设置为x父节点的右节点
                 p.parent.right = r;
+            // （5）将 x 设为 y的左节点
             r.left = p;
+            // （6）将 x的父节点 设为 y
             p.parent = r;
         }
     }
 
     /** From CLR */
+    /**
+     * 以p为支点进行右旋
+     * 假设p为图中的y
+     */
     private void rotateRight(Entry<K,V> p) {
         if (p != null) {
+            // p的左节点，即x
             Entry<K,V> l = p.left;
+            // （1）将 x的右节点 设为 y的左节点
             p.left = l.right;
+            // （2）将 y 设为 x的右节点的父节点（如果x有右节点的话）
             if (l.right != null) l.right.parent = p;
+            // （3）将 y的父节点 设为 x的父节点
             l.parent = p.parent;
+            // （4）...
             if (p.parent == null)
+                // 如果 y的父节点 是 空节点，则将x设为根节点
                 root = l;
             else if (p.parent.right == p)
+                // 如果y是它父节点的右节点，则将x设为y的父节点的右节点
                 p.parent.right = l;
+            // 如果y是它父节点的左节点，则将x设为y的父节点的左节点
             else p.parent.left = l;
+            // （5）将 y 设为 x的右节点
             l.right = p;
+            // （6）将 y的父节点 设为 x
             p.parent = l;
         }
     }

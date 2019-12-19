@@ -120,6 +120,7 @@ public interface SortedMap<K,V> extends Map<K,V> {
      *         or {@code null} if this map uses the natural ordering
      *         of its keys
      */
+    // key的比较器
     Comparator<? super K> comparator();
 
     /**
@@ -150,6 +151,7 @@ public interface SortedMap<K,V> extends Map<K,V> {
      *         {@code toKey}; or if this map itself has a restricted
      *         range, and {@code fromKey} or {@code toKey} lies
      *         outside the bounds of the range
+     * 返回fromKey（包含）到toKey（不包含）之间的元素组成的子map
      */
     SortedMap<K,V> subMap(K fromKey, K toKey);
 
@@ -177,6 +179,7 @@ public interface SortedMap<K,V> extends Map<K,V> {
      * @throws IllegalArgumentException if this map itself has a
      *         restricted range, and {@code toKey} lies outside the
      *         bounds of the range
+     *         返回小于toKey（不包含）的子map
      */
     SortedMap<K,V> headMap(K toKey);
 
@@ -204,6 +207,7 @@ public interface SortedMap<K,V> extends Map<K,V> {
      * @throws IllegalArgumentException if this map itself has a
      *         restricted range, and {@code fromKey} lies outside the
      *         bounds of the range
+     *         返回大于等于fromKey（包含）的子map
      */
     SortedMap<K,V> tailMap(K fromKey);
 
@@ -212,6 +216,8 @@ public interface SortedMap<K,V> extends Map<K,V> {
      *
      * @return the first (lowest) key currently in this map
      * @throws NoSuchElementException if this map is empty
+     *
+     * 返回最小的key
      */
     K firstKey();
 
@@ -220,6 +226,7 @@ public interface SortedMap<K,V> extends Map<K,V> {
      *
      * @return the last (highest) key currently in this map
      * @throws NoSuchElementException if this map is empty
+     * 返回最大的key
      */
     K lastKey();
 
@@ -239,6 +246,7 @@ public interface SortedMap<K,V> extends Map<K,V> {
      *
      * @return a set view of the keys contained in this map, sorted in
      *         ascending order
+     *         返回key集合
      */
     Set<K> keySet();
 
@@ -259,6 +267,7 @@ public interface SortedMap<K,V> extends Map<K,V> {
      *
      * @return a collection view of the values contained in this map,
      *         sorted in ascending key order
+     *         返回value集合
      */
     Collection<V> values();
 
@@ -279,6 +288,7 @@ public interface SortedMap<K,V> extends Map<K,V> {
      *
      * @return a set view of the mappings contained in this map,
      *         sorted in ascending key order
+     *          返回节点集合
      */
     Set<Map.Entry<K, V>> entrySet();
 }
