@@ -66,6 +66,7 @@ public class WeakReference<T> extends Reference<T> {
      *          or <tt>null</tt> if registration is not required
      */
     public WeakReference(T referent, ReferenceQueue<? super T> q) {
+        // 调用Reference的构造方法初始化key和引用队列
         super(referent, q);
     }
 

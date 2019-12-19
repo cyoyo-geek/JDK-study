@@ -88,9 +88,10 @@ public abstract class Reference<T> {
      * discovered objects through the discovered field. The discovered
      * field is also used for linking Reference objects in the pending list.
      */
-
+    // 实际存储key的地方
     private T referent;         /* Treated specially by GC */
 
+    // 引用队列
     volatile ReferenceQueue<? super T> queue;
 
     /* When active:   NULL
