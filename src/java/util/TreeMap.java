@@ -1055,10 +1055,13 @@ public class TreeMap<K,V>
     @Override
     public void forEach(BiConsumer<? super K, ? super V> action) {
         Objects.requireNonNull(action);
+        // 遍历前的修改次数
         int expectedModCount = modCount;
+        // 执行遍历，先获取第一个元素的位置，再循环遍历后继节点
         for (Entry<K, V> e = getFirstEntry(); e != null; e = successor(e)) {
+            // 执行动作
             action.accept(e.key, e.value);
-
+            // 如果发现修改次数变了，则抛出异常
             if (expectedModCount != modCount) {
                 throw new ConcurrentModificationException();
             }
@@ -2178,6 +2181,7 @@ public class TreeMap<K,V>
      * key-sort function).  Returns null if the TreeMap is empty.
      */
     final Entry<K,V> getFirstEntry() {
+        // 从根节点开始找最左边的节点，即最小的元素
         Entry<K,V> p = root;
         if (p != null)
             while (p.left != null)
@@ -2202,13 +2206,18 @@ public class TreeMap<K,V>
      */
     static <K,V> TreeMap.Entry<K,V> successor(Entry<K,V> t) {
         if (t == null)
+            // 如果当前节点为空，返回空
             return null;
         else if (t.right != null) {
+            // 如果当前节点有右子树，取右子树中最小的节点
             Entry<K,V> p = t.right;
             while (p.left != null)
                 p = p.left;
             return p;
         } else {
+            // 如果当前节点没有右子树
+            // 如果当前节点是父节点的左子节点，直接返回父节点
+            // 如果当前节点是父节点的右子节点，一直往上找，直到找到一个祖先节点是其父节点的左子节点为止，返回这个祖先节点的父节点
             Entry<K,V> p = t.parent;
             Entry<K,V> ch = t;
             while (p != null && ch == p.right) {
