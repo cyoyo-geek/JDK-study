@@ -30,7 +30,7 @@ public class FalseSharingTest {
 class Pointer
 {
     volatile long x;
-    long p1, p2, p3, p4, p5, p6, p7;
+    long p1, p2, p3, p4, p5, p6, p7;  // 去除伪共享
     volatile long y;
 }
 //
