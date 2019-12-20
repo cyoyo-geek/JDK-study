@@ -146,12 +146,18 @@ public class AtomicStampedReference<V> {
                                  V   newReference,
                                  int expectedStamp,
                                  int newStamp) {
+        // 获取当前的（元素值，版本号）对
         Pair<V> current = pair;
         return
+            // 引用没变
             expectedReference == current.reference &&
+            // 版本号没变
             expectedStamp == current.stamp &&
+            // 新引用等于旧引用
             ((newReference == current.reference &&
+            // 新版本号等于旧版本号
               newStamp == current.stamp) ||
+            // 构造新的Pair对象并CAS更新
              casPair(current, Pair.of(newReference, newStamp)));
     }
 
@@ -195,6 +201,7 @@ public class AtomicStampedReference<V> {
         objectFieldOffset(UNSAFE, "pair", AtomicStampedReference.class);
 
     private boolean casPair(Pair<V> cmp, Pair<V> val) {
+        // 调用Unsafe的compareAndSwapObject()方法CAS更新pair的引用为新引用
         return UNSAFE.compareAndSwapObject(this, pairOffset, cmp, val);
     }
 
