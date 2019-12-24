@@ -22,7 +22,7 @@ public class FalseSharingTest {
         t1.join();
         t2.join();
         System.out.println(System.currentTimeMillis()-start);
-        System.out.println(pointer);
+        System.out.println("pointer.x=" + pointer.x +"\n"+ "pointer.y=" + pointer.y);
     }
 
 }
