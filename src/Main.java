@@ -25,6 +25,8 @@ public class Main {
                 1080,1440,900,1080,1440,1080,1440,1620,990,1350,1530,810,990,1260,1620};
 //        int[] b= {1,2};
 //        System.out.println(twoSum(a, 2600));
+        System.out.println(System.getProperty("sun.arch.data.model"));
+        System.out.println(System.getProperty("java.class.path"));
 //        System.out.println(Arrays.toString(twoSum(b, 3)));
 
     }
